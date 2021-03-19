@@ -4,18 +4,18 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.09";
-    fstar-master-source = {
+    fstar-source = {
       url = "github:FStarLang/FStar";
       flake = false;
     };
   };
   
-  outputs = { self, nixpkgs, flake-utils, fstar-master-source }:
+  outputs = { self, nixpkgs, flake-utils, fstar-source }:
     let
-      fstar-master = pkgs:
+      fstar = pkgs:
         pkgs.callPackage ./. {
-          src = fstar-master-source;
-          name = "fstar-master";
+          src = fstar-source;
+          name = "fstar-${fstar-source.rev}";
           z3 = pkgs.z3.overrideAttrs (_: rec {
             version = "4.8.5";
             src = pkgs.fetchFromGitHub {
@@ -35,13 +35,13 @@
         in  
           rec {
             packages = {
-              fstar = fstar-master pkgs;
+              fstar = fstar pkgs;
             };
             defaultPackage = packages.fstar;
           }
       ) // {
         overlay = final: prev: {
-          fstar = fstar-master prev;
+          fstar = fstar prev;
         } // import ./tools final;
       };
 }

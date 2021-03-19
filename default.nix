@@ -1,10 +1,10 @@
 { stdenv, lib, pkgs, fetchFromGitHub
 , ocamlPackages, makeWrapper, z3
   
-, src, name
+, src, name, patches ? []
 }:
 stdenv.mkDerivation rec {
-  inherit name src;
+  inherit name src patches;
   
   nativeBuildInputs = [ makeWrapper ];
   buildInputs = with ocamlPackages; [
@@ -19,13 +19,12 @@ stdenv.mkDerivation rec {
     sedlex_2
   ];
   makeFlags = [ "PREFIX=$(out)" ];
-  preBuild = ''# First, we 
-                   echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
-                   patchShebangs src/tools
-                   patchShebangs ulib # for `gen_mllib.sh`
-                   patchShebangs bin
-                   makeFlagsArray+=( OTHERFLAGS="--admit_smt_queries true" )
-                   '';
+  preBuild = ''echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
+               patchShebangs src/tools
+               patchShebangs ulib # for `gen_mllib.sh`
+               patchShebangs bin
+               makeFlagsArray+=( OTHERFLAGS="--admit_smt_queries true" )
+             '';
   postBuild = '''';
   preInstall = ''mkdir -p $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib'';
   installFlags = "-C src/ocaml-output";
