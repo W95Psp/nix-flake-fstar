@@ -13,7 +13,7 @@
   outputs = { self, nixpkgs, flake-utils, fstar-source }:
     let
       fstar = pkgs:
-        pkgs.callPackage ./. {
+        pkgs.callPackage ./fstar.nix {
           src = fstar-source;
           name = "fstar-${fstar-source.rev}";
           z3 = pkgs.z3.overrideAttrs (_: rec {
@@ -37,11 +37,14 @@
             packages = {
               fstar = fstar pkgs;
             };
+            lib = {
+              fstar = import ./lib.nix;
+            };
             defaultPackage = packages.fstar;
           }
       ) // {
         overlay = final: prev: {
           fstar = fstar prev;
-        } // import ./tools final;
+        };
       };
 }

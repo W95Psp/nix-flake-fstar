@@ -15,7 +15,7 @@
         "type": "github"
       }
     },
-    "fstar-master-source": {
+    "fstar-source": {
       "flake": false,
       "locked": {
         "lastModified": 1616136387,
@@ -50,7 +50,7 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "fstar-master-source": "fstar-master-source",
+        "fstar-source": "fstar-source",
         "nixpkgs": "nixpkgs"
       }
     }
