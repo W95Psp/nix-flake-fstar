@@ -1,5 +1,7 @@
 { stdenv, lib, pkgs, fetchFromGitHub
 , ocamlPackages, makeWrapper, z3
+
+, enable_sedlex ? true
   
 , src, name, patches ? []
 }:
@@ -16,8 +18,7 @@ stdenv.mkDerivation rec {
     ppx_deriving ppx_deriving_yojson process
     ocaml-migrate-parsetree
 
-    sedlex_2
-  ];
+  ] ++ (if enable_sedlex then [sedlex_2] else [ulex camlp4]);
   makeFlags = [ "PREFIX=$(out)" ];
   preBuild = ''echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
                patchShebangs src/tools

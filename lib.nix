@@ -19,4 +19,21 @@
           make -C ulib install-fstar-tactics OTHERFLAGS="--admit_smt_queries true"
         '';
       });
+  use-ulex = nixpkgs: pkgs: der:
+    let
+      ocaml = import "${nixpkgs}/pkgs/development/compilers/ocaml/4.08.nix"
+        { inherit (pkgs) stdenv fetchurl ncurses buildEnv libunwind;
+          libX11 = pkgs.xorg.libX11;
+          xorgproto = pkgs.xorg.xorgproto;
+        };
+      ocamlPackages = pkgs.ocamlPackages.overrideScope' (self': super: {
+        ocaml = ocaml;
+      });
+    in
+      der.override {
+        inherit ocamlPackages;
+        enable_sedlex = false;
+      };
+
+  # run-script-with-revision = revision
 }

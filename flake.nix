@@ -12,19 +12,20 @@
   
   outputs = { self, nixpkgs, flake-utils, fstar-source }:
     let
+      z3 = pkgs: pkgs.z3.overrideAttrs (_: rec {
+        version = "4.8.5";
+        src = pkgs.fetchFromGitHub {
+          owner  = "Z3Prover";
+          repo   = "z3";
+          rev    = "Z3-${version}";
+          sha256 = "11sy98clv7ln0a5vqxzvh6wwqbswsjbik2084hav5kfws4xvklfa";
+        };
+      });
       fstar = pkgs:
         pkgs.callPackage ./fstar.nix {
           src = fstar-source;
           name = "fstar-${fstar-source.rev}";
-          z3 = pkgs.z3.overrideAttrs (_: rec {
-            version = "4.8.5";
-            src = pkgs.fetchFromGitHub {
-              owner  = "Z3Prover";
-              repo   = "z3";
-              rev    = "Z3-${version}";
-              sha256 = "11sy98clv7ln0a5vqxzvh6wwqbswsjbik2084hav5kfws4xvklfa";
-            };
-          });
+          z3 = z3 pkgs;
         };
     in
     flake-utils.lib.eachSystem [ "x86_64-darwin" "x86_64-linux"]
@@ -36,6 +37,7 @@
           rec {
             packages = {
               fstar = fstar pkgs;
+              z3 = z3 pkgs;
             };
             lib = {
               fstar = import ./lib.nix;
@@ -45,6 +47,7 @@
       ) // {
         overlay = final: prev: {
           fstar = fstar prev;
+          z3 = z3 prev;
         };
       };
 }
