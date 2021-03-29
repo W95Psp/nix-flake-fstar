@@ -35,7 +35,12 @@
           pkgs = nixpkgs.legacyPackages.${system};
           unstable = nixpkgs-unstable.legacyPackages.${system};
           lib = pkgs.lib;
-          z3 = if system == "aarch64-linux" then unstable.z3 else z3b pkgs;
+          z3 =
+            if system == "aarch64-linux"
+            then builtins.trace ''Warning: F* on aarch64 will use a recent, untested, z3 build.
+This probably will result in verification failures.
+See https://github.com/FStarLang/FStar/blob/master/INSTALL.md#runtime-dependency-particular-version-of-z3.'' unstable.z3
+            else z3b pkgs;
         in  
           rec {
             packages = {
