@@ -2,7 +2,8 @@
 , ocamlPackages, makeWrapper, z3
 
 , enable_sedlex ? true
-  
+, keep_src ? false
+
 , src, name, patches ? []
 }:
 stdenv.mkDerivation rec {
@@ -30,7 +31,7 @@ stdenv.mkDerivation rec {
   preInstall = ''mkdir -p $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib'';
   installFlags = "-C src/ocaml-output";
   postInstall = ''
-          mkdir -p $out/ulib/; cp -rv ./ulib/ $out/
+          mkdir -p $out/ulib/; cp -rv ./ulib/ ${if keep_src then "./src/" else ""} $out/
           wrapProgram $out/bin/fstar.exe --prefix PATH ":" "${lib.getBin z3}/bin"
           ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-tactics-lib  $out/bin/fstar-tactics-lib
           ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
