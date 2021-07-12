@@ -34,11 +34,11 @@ let
     ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
     ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-compiler-lib $out/bin/fstar-compiler-lib
   '';
-  buildOCaml = src: stdenv.mkDerivation rec {
+  buildOCaml = with-ulib: src: stdenv.mkDerivation rec {
     inherit name src patches nativeBuildInputs buildInputs installPhase;
     
     buildPhase = ''${preBuild}
-                   make 1 -j6'';
+                   make ${if with-ulib then "" else "1"} -j6'';
   };
   extractFStar = existing-fstar: stdenv.mkDerivation {
     inherit name src patches nativeBuildInputs; # buildInputs;
@@ -53,5 +53,5 @@ let
     installPhase = ''cp -r . $out'';
   };
 in
-buildOCaml (extractFStar (if isNull bootstrap-with then buildOCaml src else bootstrap-with))
+buildOCaml true (extractFStar (if isNull bootstrap-with then buildOCaml false src else bootstrap-with))
 
