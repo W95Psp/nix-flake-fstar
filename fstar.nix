@@ -24,21 +24,28 @@ let
     patchShebangs src/tools
     patchShebangs ulib # for `gen_mllib.sh`
     patchShebangs bin'';
+  installLibs = ''
+    cp -rv bin/fstar-tactics-lib  $out/bin/fstar-tactics-lib
+    cp -rv bin/fstarlib           $out/bin/fstarlib
+    cp -rv bin/fstar-compiler-lib $out/bin/fstar-compiler-lib
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-tactics-lib  $out/bin/fstar-tactics-lib
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-compiler-lib $out/bin/fstar-compiler-lib
+  '';
   installPhase = ''
     mkdir -p $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib
     mkdir -p $out/ulib/ $out/bin/
     cp bin/fstar.exe $out/bin/fstar.exe
     cp -rv ./ulib/ ${if keep_src then "./src/" else ""} $out/
     wrapProgram $out/bin/fstar.exe --prefix PATH ":" "${lib.getBin z3}/bin"
-    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-tactics-lib  $out/bin/fstar-tactics-lib
-    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
-    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-compiler-lib $out/bin/fstar-compiler-lib
   '';
-  buildOCaml = with-ulib: src: stdenv.mkDerivation rec {
-    inherit name src patches nativeBuildInputs buildInputs installPhase;
+  buildOCaml = withlibs: src: stdenv.mkDerivation {
+    inherit name src patches nativeBuildInputs buildInputs;
     
     buildPhase = ''${preBuild}
-                   make ${if with-ulib then "" else "1"} -j6'';
+                   make ${if withlibs then "" else "1"} -j6'';
+
+    installPhase = ''${installPhase}${if withlibs then installLibs else ""}'';
   };
   extractFStar = existing-fstar: stdenv.mkDerivation {
     inherit name src patches nativeBuildInputs; # buildInputs;
@@ -53,5 +60,6 @@ let
     installPhase = ''cp -r . $out'';
   };
 in
+# buildOCaml false src
 buildOCaml true (extractFStar (if isNull bootstrap-with then buildOCaml false src else bootstrap-with))
 
