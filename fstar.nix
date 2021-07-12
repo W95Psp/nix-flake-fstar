@@ -3,12 +3,12 @@
 
 , enable_sedlex ? true
 , keep_src ? false
+, bootstrap-with ? null
 
 , src, name, patches ? []
 }:
-stdenv.mkDerivation rec {
-  inherit name src patches;
-  
+
+let
   nativeBuildInputs = [ makeWrapper ];
   buildInputs = with ocamlPackages; [
     z3 ocaml
@@ -18,24 +18,40 @@ stdenv.mkDerivation rec {
     zarith yojson fileutils pprint menhir
     ppx_deriving ppx_deriving_yojson process
     ocaml-migrate-parsetree
-
   ] ++ (if enable_sedlex then [sedlex_2] else [ulex camlp4]);
-  makeFlags = [ "PREFIX=$(out)" ];
-  preBuild = ''echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
-               patchShebangs src/tools
-               patchShebangs ulib # for `gen_mllib.sh`
-               patchShebangs bin
-               makeFlagsArray+=( OTHERFLAGS="--admit_smt_queries true" )
-             '';
-  postBuild = '''';
-  preInstall = ''mkdir -p $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib'';
-  installFlags = "-C src/ocaml-output";
-  postInstall = ''
-          mkdir -p $out/ulib/; cp -rv ./ulib/ ${if keep_src then "./src/" else ""} $out/
-          wrapProgram $out/bin/fstar.exe --prefix PATH ":" "${lib.getBin z3}/bin"
-          ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-tactics-lib  $out/bin/fstar-tactics-lib
-          ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
-          ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-compiler-lib $out/bin/fstar-compiler-lib
-      '';
-}
+  preBuild = ''
+    echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
+    patchShebangs src/tools
+    patchShebangs ulib # for `gen_mllib.sh`
+    patchShebangs bin'';
+  installPhase = ''
+    mkdir -p $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib
+    mkdir -p $out/ulib/ $out/bin/
+    cp bin/fstar.exe $out/bin/fstar.exe
+    cp -rv ./ulib/ ${if keep_src then "./src/" else ""} $out/
+    wrapProgram $out/bin/fstar.exe --prefix PATH ":" "${lib.getBin z3}/bin"
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-tactics-lib  $out/bin/fstar-tactics-lib
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstarlib           $out/bin/fstarlib
+    ln -s $out/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib/fstar-compiler-lib $out/bin/fstar-compiler-lib
+  '';
+  buildOCaml = src: stdenv.mkDerivation rec {
+    inherit name src patches nativeBuildInputs buildInputs installPhase;
+    
+    buildPhase = ''${preBuild}
+                   make 1 -j6'';
+  };
+  extractFStar = existing-fstar: stdenv.mkDerivation {
+    inherit name src patches nativeBuildInputs; # buildInputs;
+
+    buildInputs = buildInputs ++ [pkgs.which];
+    
+    buildPhase = ''echo "#!/usr/bin/env bash" > bin/fstar-any.sh
+                   echo "\"${existing-fstar}/bin/fstar.exe\" \"\$@\"" >> bin/fstar-any.sh
+                   ${preBuild}
+                   make ocaml -C src -j6'';
+
+    installPhase = ''cp -r . $out'';
+  };
+in
+buildOCaml (extractFStar (if isNull bootstrap-with then buildOCaml src else bootstrap-with))
 
