@@ -23,7 +23,7 @@ COMPILER_LIB_INCLUDES=src/ocaml-output \
 COMPILER_LIB_INCLUDES_FLAGS := $(addprefix -I , $(COMPILER_LIB_INCLUDES))
 
 fstar-compiler-lib.mllib: $(FSTAR_MAIN_NATIVE)
-	../../ulib/gen_mllib.sh . $(addprefix ../../, $(COMPILER_LIB_INCLUDES)) > fstar-compiler-lib.mllib
+	../../ulib/gen_mllib.sh . $(addprefix ../../, $(COMPILER_LIB_INCLUDES)) | sed '/FStar_Main/d' | sed '/FStar.Tactics.Load/d' > fstar-compiler-lib.mllib
 
 compiler-lib-cmx: $(FSTAR_MAIN_NATIVE) fstar-compiler-lib.mllib
 	rm ../../ulib/ml/extracted/FStar_Pervasives.* || true
