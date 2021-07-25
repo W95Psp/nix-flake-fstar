@@ -22,11 +22,11 @@
           sha256 = "11sy98clv7ln0a5vqxzvh6wwqbswsjbik2084hav5kfws4xvklfa";
         };
       });
-      fstar = z3: pkgs:
-        pkgs.callPackage ./fstar.nix {
-          src = fstar-source;
-          name = "fstar-${fstar-source.rev}";
+      fstar-nixlib = z3: pkgs:
+        pkgs.callPackage ./lib.nix {
+          mkDerivation = pkgs.stdenv.mkDerivation;
           inherit z3;
+          inherit (pkgs) ocamlPackages lib makeWrapper which;
         };
     in
     flake-utils.lib.eachSystem [ "x86_64-darwin" "x86_64-linux" "aarch64-linux" ]
@@ -34,7 +34,6 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           unstable = nixpkgs-unstable.legacyPackages.${system};
-          lib = pkgs.lib;
           z3 =
             if system == "aarch64-linux"
             then builtins.trace ''Warning: F* on aarch64 will use a recent, untested, z3 build.
@@ -44,17 +43,32 @@ See https://github.com/FStarLang/FStar/blob/master/INSTALL.md#runtime-dependency
         in  
           rec {
             packages = {
-              fstar = fstar z3 pkgs;
+              fstar = pkgs.callPackage lib.fstar.build {src = fstar-source; name = "fstar-${fstar-source.rev}";};
               z3 = z3;
             };
             lib = {
-              fstar = import ./lib.nix;
+              fstar = fstar-nixlib z3 pkgs //
+                      import ./lib-extra.nix {
+                        inherit pkgs;
+                        fstar-nixlib = fstar-nixlib z3 pkgs;
+                        z3 = z3;
+                      };
+            };
+            apps = {
+              repl = flake-utils.lib.mkApp {
+                drv = pkgs.writeShellScriptBin "repl" ''
+                  confnix=$(mktemp)
+                  echo "builtins.getFlake (toString $(git rev-parse --show-toplevel))" >$confnix
+                  trap "rm $confnix" EXIT
+                  nix repl $confnix
+                '';
+              };
             };
             defaultPackage = packages.fstar;
           }
       ) // {
         overlay = final: prev: {
-          fstar = fstar (z3b prev) prev;
+          fstar = fstar-nixlib (z3b prev) prev {src = fstar-source; name = "fstar-${fstar-source.rev}";};
           z3 = z3b prev;
         };
       };
