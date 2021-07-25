@@ -62,6 +62,7 @@ let
     };
 in
 {
-  inherit build ocaml-from-fstar binary-of-ml-snapshot buildInputs installLibs;
+  inherit build ocaml-from-fstar binary-of-ml-snapshot buildInputs
+    binary-installPhase installLibs;
 }
 
