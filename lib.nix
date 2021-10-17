@@ -54,11 +54,11 @@ let
   build =
     { src, name
     , keep_src ? false, withlibs ? true, patches ? []
-    , existing-fstar ? binary-of-ml-snapshot {inherit src name; keep_src = true; withlibs = false;}
+    , existing-fstar ? binary-of-ml-snapshot {inherit src; name = "${name}-bin-from-snapshot"; keep_src = true; withlibs = false;}
     }:
     binary-of-ml-snapshot {
-      inherit name keep_src withlibs;
-      src = ocaml-from-fstar {inherit src name existing-fstar patches;};
+      inherit keep_src withlibs name;
+      src = ocaml-from-fstar {name = "${name}-extracted-fstar"; inherit src existing-fstar patches;};
     };
 in
 {
