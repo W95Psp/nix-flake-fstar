@@ -29,7 +29,7 @@ let
     ${if withlibs then installLibs else ""}
   '';
   binary-of-ml-snapshot =
-    { src, name, keep_src ? false, withlibs ? true      
+    { src, name, keep_src ? false, withlibs ? true
     }: mkDerivation {
       inherit name src buildInputs;
       nativeBuildInputs = [ makeWrapper ];
@@ -37,6 +37,9 @@ let
       buildPhase = ''${preBuild {inherit name;}}
                      make ${if withlibs then "" else "1"} -j6'';
       installPhase = binary-installPhase {inherit keep_src withlibs;};
+      meta = {
+        mainProgram = "fstar.exe";
+      };
     };
   ocaml-from-fstar = { src, name, existing-fstar, patches ? []
                      }: mkDerivation {

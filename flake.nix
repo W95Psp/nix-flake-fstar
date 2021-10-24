@@ -52,17 +52,9 @@ See https://github.com/FStarLang/FStar/blob/master/INSTALL.md#runtime-dependency
                         inherit pkgs;
                         fstar-nixlib = fstar-nixlib z3 pkgs;
                         z3 = z3;
+                      } // {
+                        inherit (pkgs) ocamlPackages;
                       };
-            };
-            apps = {
-              repl = flake-utils.lib.mkApp {
-                drv = pkgs.writeShellScriptBin "repl" ''
-                  confnix=$(mktemp)
-                  echo "builtins.getFlake (toString $(git rev-parse --show-toplevel))" >$confnix
-                  trap "rm $confnix" EXIT
-                  nix repl $confnix
-                '';
-              };
             };
             defaultPackage = packages.fstar;
           }

@@ -1,0 +1,24 @@
+From cfb4a0724d07a097a05407792fe1999b20962b1e Mon Sep 17 00:00:00 2001
+From: Lucas Franceschino <lucas.franceschino@inria.fr>
+Date: Sun, 24 Oct 2021 10:00:48 +0200
+Subject: [PATCH] Example patch
+
+---
+ src/fstar/FStar.Main.fs | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/fstar/FStar.Main.fs b/src/fstar/FStar.Main.fs
+index c7e760c710..c5f8d8c81b 100644
+--- a/src/fstar/FStar.Main.fs
++++ b/src/fstar/FStar.Main.fs
+@@ -233,6 +233,7 @@ let handle_error e =
+     report_errors []
+ 
+ let main () =
++  Util.print1 "Hello from patch!";
+   try
+     setup_hooks ();
+     let _, time = Util.record_time go in
+-- 
+2.31.1
+
