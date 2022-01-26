@@ -45,6 +45,17 @@ See https://github.com/FStarLang/FStar/blob/master/INSTALL.md#runtime-dependency
             packages = {
               fstar = pkgs.callPackage lib.fstar.build {src = fstar-source; name = "fstar-${fstar-source.rev}";};
               z3 = z3;
+              fstardoc = pkgs.stdenv.mkDerivation {
+                name = "fstardoc";
+                phases = ["installPhase"];
+                installPhase = ''
+                mkdir -p $out/bin && cd $out/bin
+                ( echo "#! ${pkgs.python3}/bin/python3"
+                  cat ${fstar-source}/.scripts/fstardoc/fstardoc.py
+                ) > fstardoc
+                chmod +x fstardoc
+                '';
+              };
             };
             lib = {
               fstar = fstar-nixlib z3 pkgs //
