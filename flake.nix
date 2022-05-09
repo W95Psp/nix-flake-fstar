@@ -44,6 +44,7 @@ See https://github.com/FStarLang/FStar/blob/master/INSTALL.md#runtime-dependency
           rec {
             packages = {
               fstar = pkgs.callPackage lib.fstar.build {src = fstar-source; name = "fstar-${fstar-source.rev}";};
+              fstar-no-ulib = packages.fstar.override {withlibs = false;};
               z3 = z3;
               fstardoc = pkgs.stdenv.mkDerivation {
                 name = "fstardoc";

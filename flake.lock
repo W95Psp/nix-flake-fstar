@@ -2,11 +2,11 @@
   "nodes": {
     "flake-utils": {
       "locked": {
-        "lastModified": 1644229661,
-        "narHash": "sha256-1YdnJAsNy69bpcjuoKdOYQX0YxZBiCYZo4Twxerqv7k=",
+        "lastModified": 1649676176,
+        "narHash": "sha256-OWKJratjt2RW151VUlJPRALb7OU2S5s+f0vLj4o1bHM=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "3cecb5b042f7f209c56ffd8371b2711a290ec797",
+        "rev": "a4b154ebbdc88c8498a5c7b01589addc9e9cb678",
         "type": "github"
       },
       "original": {
@@ -18,11 +18,11 @@
     "fstar-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1647927120,
-        "narHash": "sha256-yU6XUNCHH9/vOZ5fVRZHHkOMBjftYMp7YQ47WUhQiXw=",
+        "lastModified": 1652077385,
+        "narHash": "sha256-J/duaEzEvKNyxwfKaAcPBuPilO0xi7koPeyFZCh7kMo=",
         "owner": "FStarLang",
         "repo": "FStar",
-        "rev": "3991ca2f533fc626431d2eddcd25384db4d0bb68",
+        "rev": "9c74a60fbc9d16c7c38d3ae30dbfe8f4c7c1a8e2",
         "type": "github"
       },
       "original": {
@@ -49,11 +49,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1647800324,
-        "narHash": "sha256-rjwoxrk16zfrcO5Torh6CbAd5GHsHrXw+EwxOvh9AUI=",
+        "lastModified": 1651726670,
+        "narHash": "sha256-dSGdzB49SEvdOJvrQWfQYkAefewXraHIV08Vz6iDXWQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9bc841fec1c0e8b9772afa29f934d2c7ce57da8e",
+        "rev": "c777cdf5c564015d5f63b09cc93bef4178b19b01",
         "type": "github"
       },
       "original": {

@@ -1,6 +1,7 @@
 { ocamlPackages, mkDerivation, lib, makeWrapper, z3, which }:
 
 let
+  # TODO: we don't need z3 all the time
   buildInputs = with ocamlPackages; [
     z3 ocaml
 
@@ -37,9 +38,7 @@ let
       buildPhase = ''${preBuild {inherit name;}}
                      make ${if withlibs then "" else "1"} -j6'';
       installPhase = binary-installPhase {inherit keep_src withlibs;};
-      meta = {
-        mainProgram = "fstar.exe";
-      };
+      meta.mainProgram = "fstar.exe";
     };
   ocaml-from-fstar = { src, name, existing-fstar, patches ? []
                      }: mkDerivation {
@@ -47,10 +46,18 @@ let
                        
                        buildInputs = buildInputs ++ [which];
                    
-                       buildPhase = ''echo "#!/usr/bin/env bash" > bin/fstar-any.sh
-                                      echo "\"${existing-fstar}/bin/fstar.exe\" \"\$@\"" >> bin/fstar-any.sh
-                                      ${preBuild {inherit name;}}
-                                      make ocaml -C src -j6'';
+                       buildPhase = ''
+                         cd bin
+                         test -f fstar-any.sh && { 
+                             # we are before commit 6dbcdc1bce
+                             rm fstar-any.sh
+                             ln -s '${existing-fstar}/bin/fstar.exe' fstar-any.sh
+                         }
+                         ln -s '${existing-fstar}/bin/fstar.exe' fstar.exe
+                         cd ..
+                         ${preBuild {inherit name;}}
+                         make ocaml -C src -j6
+                       '';
                    
                        installPhase = ''cp -r . $out'';
                      };
