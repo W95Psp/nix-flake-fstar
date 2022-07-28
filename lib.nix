@@ -69,7 +69,7 @@ let
     binary-of-ml-snapshot {
       inherit keep_src withlibs name;
       src = ocaml-from-fstar {name = "${name}-extracted-fstar"; inherit src existing-fstar patches;};
-    };
+    } // {passthru = {inherit ocamlPackages;};};
 in
 {
   inherit build ocaml-from-fstar binary-of-ml-snapshot buildInputs
