@@ -7,8 +7,8 @@ let
 
     # Following F*'s INSTALL.md 
     ocamlbuild findlib batteries stdint zarith yojson fileutils pprint
-    menhir ppx_deriving ppx_deriving_yojson process ocaml-migrate-parsetree
-    sedlex_2
+    menhir menhirLib ppx_deriving ppx_deriving_yojson process
+    ocaml-migrate-parsetree sedlex
   ];
   preBuild = {name}: ''
     echo "echo ${lib.escapeShellArg name}" > src/tools/get_commit
